@@ -1,16 +1,16 @@
 package com.video.main;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.concurrent.ExecutionException;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.util.Utils;
+import org.apache.commons.codec.binary.Base64;
+
 // [START videointelligence_quickstart]
 import com.google.api.gax.grpc.OperationFuture;
-import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.ComputeScopes;
 import com.google.cloud.videointelligence.v1beta1.AnnotateVideoProgress;
 import com.google.cloud.videointelligence.v1beta1.AnnotateVideoRequest;
 import com.google.cloud.videointelligence.v1beta1.AnnotateVideoResponse;
@@ -26,30 +26,31 @@ public class QuickstartSample {
   public static void main(String[] args) throws
         ExecutionException, IOException, InterruptedException {
     // Instantiate the client
-	  System.out.println("Initiating.....1");
-	  GoogleCredential credential = GoogleCredential.getApplicationDefault();
-	  
-	  Compute compute = new Compute.Builder
-			    (Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(), credential)
-			    .setApplicationName("VideoFilteration").build();
-//	  
-	  Collection COMPUTE_SCOPES =
-			    Collections.singletonList(ComputeScopes.COMPUTE);
-			if (credential.createScopedRequired()) {
-			    credential = credential.createScoped(COMPUTE_SCOPES);
-			}
+    System.out.println("Initiating.....1");
 	  
     VideoIntelligenceServiceSettings settings =
         VideoIntelligenceServiceSettings.defaultBuilder().build();
     VideoIntelligenceServiceClient client = VideoIntelligenceServiceClient.create(settings);
 
     // The Google Cloud Storage path to the video to annotate.
-    String gcsUri = "C://Users/Suchi/Downloads/Underwater_Waterfall.mp4";
+    
+    //Path path = Paths.get("C://Users/Joon/Downloads/Underwater_Waterfall.mp4");
+//    Path path = Paths.get("C://Users/Joon/Downloads/mfund2.mp4");
+//      Path path = Paths.get("C://Users/Joon/Downloads/fidvid5.mp4");
+     //Path path = Paths.get("C://Users/Joon/Downloads/steve1.mp4");
+      	Path path = Paths.get("C://Users/Joon/Downloads/zoo2.mp4");
+    
+    
+    
+    
+    
+    byte[] data = Files.readAllBytes(path);
+    byte[] encodedBytes = Base64.encodeBase64(data);
 
     // Create an operation that will contain the response when the operation completes.
     AnnotateVideoRequest request = AnnotateVideoRequest.newBuilder()
-            .setInputUri(gcsUri)
-            .addFeatures(Feature.LABEL_DETECTION)
+            .setInputContent(new String(encodedBytes, "UTF-8"))
+            .addFeatures(Feature.SAFE_SEARCH_DETECTION)
             .build();
 
     OperationFuture<AnnotateVideoResponse, AnnotateVideoProgress> operation =
@@ -75,7 +76,8 @@ public class QuickstartSample {
           System.out.println();
         }
       } else {
-        System.out.println("No labels detected in " + gcsUri);
+        System.out.println("No labels detected ");
+        UserDefinedFileAttributeView userDefinedFileAttributeView = null;
       }
     }
   }
